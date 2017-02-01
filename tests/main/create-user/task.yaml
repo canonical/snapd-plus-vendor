@@ -1,0 +1,30 @@
+summary: Ensure create-user functionality
+
+systems: [-ubuntu-core-16-64, -ubuntu-core-16-arm-64, -ubuntu-core-16-arm-32]
+
+environment:
+    USER_EMAIL: mvo@ubuntu.com
+    USER_NAME: mvo
+
+restore: |
+    userdel -r $USER_NAME || true
+    rm -rf /etc/sudoers.d/create-user-$USER_NAME
+
+execute: |
+    echo "snap create-user -- ensure failure when run as non-root user without sudo"
+    expected="error: while creating user: access denied"
+    if obtained=$(su - test /bin/sh -c "snap create-user $USER_EMAIL 2>&1"); then
+        echo "create-user command should have failed"
+    fi
+    [[ "$obtained" =~ "$expected" ]]
+
+    echo "snap create-user -- ensure success when run as non-root user with sudo"
+    expected="created user \"$USER_NAME\""
+    obtained=$(su - test /bin/sh -c "sudo snap create-user --force-managed --sudoer $USER_EMAIL 2>&1")
+    [[ "$obtained" =~ "$expected" ]]
+
+    echo "ensure user exists in /etc/passwd"
+    grep -qE "^$USER_NAME:x:[0-9]+:[0-9]+:$USER_EMAIL" /etc/passwd
+
+    echo "ensure proper sudoers.d file"
+    grep -q "$USER_NAME ALL=(ALL) NOPASSWD:ALL" /etc/sudoers.d/create-user-$USER_NAME

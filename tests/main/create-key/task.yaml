@@ -1,0 +1,16 @@
+summary: Checks for snap create-key
+# ppc64el disabled because of https://github.com/snapcore/snapd/issues/2502
+systems: [-ubuntu-core-16-64, -ubuntu-core-16-arm-64, -ubuntu-core-16-arm-32, -ubuntu-16.04-ppc64el, -ubuntu-16.10-ppc64el, -ubuntu-17.04-ppc64el]
+
+prepare: |
+    . "$TESTSLIB/mkpinentry.sh"
+
+execute: |
+    echo "Checking passphrase mismatch error"
+    expect -d -f passphrase_mismatch.exp
+
+    echo "Checking successful default key pair generation"
+    expect -d -f successful_default.exp
+
+    echo "Checking successful non-default key pair generation"
+    expect -d -f successful_non_default.exp

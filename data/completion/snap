@@ -1,0 +1,40 @@
+# -*- sh -*-
+_complete() {
+    local cur prev words cword
+    _init_completion || return
+
+    local command
+    if [[ ${#words[@]} -gt 2 ]]; then
+        if [[ ${words[1]} =~ ^-- ]]; then
+            # global options take no args
+            return 0
+        fi
+        if [[ ${words[-2]} = "--help" ]]; then
+            # help takes no args
+            return 0
+        fi
+
+        command=${words[-2]}
+    fi
+
+    # Only split on newlines
+    local IFS=$'\n'
+
+    COMPREPLY=($(GO_FLAGS_COMPLETION=1 "${words[@]}"))
+
+    case $command in
+        install|info|sign-build)
+            _filedir "snap"
+            ;;
+        ack)
+            _filedir
+            ;;
+        try)
+            _filedir -d
+            ;;
+    esac
+
+    return 0
+}
+
+complete -F _complete snap
