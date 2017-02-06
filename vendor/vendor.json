@@ -134,5 +134,5 @@
 			"revisionTime": "2015-02-24T22:57:58Z"
 		}
 	],
-	"rootPath": "snapd-plus-vendor-target"
+	"rootPath": "github.com/snapcore/snapd"
 }
